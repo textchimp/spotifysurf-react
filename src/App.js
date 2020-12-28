@@ -155,7 +155,7 @@ const BreadcrumbTrail = ({trail, onClick}) => {
       trail.map( (artist, i) => {
         // Don't show last (current) item
         return i === trail.length-1 ? null : (
-          <li>
+          <li key={ artist.id }>
             <a onClick={ () => onClick(artist.id) } href="#">{ artist.name }</a>
             { i < trail.length-2 && <span>&gt;</span> }
           </li>

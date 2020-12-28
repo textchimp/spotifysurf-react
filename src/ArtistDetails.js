@@ -27,6 +27,12 @@ class ArtistDetails extends React.Component {
 
   fetchDetails(){
 
+    if( this.state.nowPlaying.audio ){
+      player.fadeOut( this.state.nowPlaying.audio );
+    }
+
+    this.setState({ nowPlaying: {}, lastPlaying: {} });
+
     console.log('fetchDetails', this);
     api.getArtistTopTracks( this.props.artist.id, this.props.onError )
     .then( res => this.setState({ tracks: res.data.tracks, loadingMsg: '' }) );
