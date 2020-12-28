@@ -51,7 +51,7 @@ class ArtistDetails extends React.Component {
   componentDidUpdate(prevProps, prevState){
     if( this.props.artist.id !== prevProps.artist.id ){
       // fetch new details (user clicked on another artist in the results)
-      d('SECONDARY FETCH', this.props.artist);
+      d('Update fetchDetails()', this.props.artist);
       this.fetchDetails();
     }
   } // componentDidUpdate
@@ -228,20 +228,8 @@ class ArtistDetails extends React.Component {
   viewRecommendedArtist = (ev, rec) => {
     ev.stopPropagation(); // do not treat as track play/pause click
     console.log('view', rec.artists[0].id);
-    // Because this artist has been selected from a recommendation
-    // (or from a breadcrumb trail click),
-    // we don't have the artist image & genres as we do from a search result;
-    // so first we have to get the artist details, and then we can
-    // load the Top Tracks and Recommendations, as usual
-    api.getArtistInfo( rec.artists[0].id, this.props.onError )
-    .then( res => {
-      // This is kind of weird, but since we can't change props and we use
-      // props to load the artist tracks & recs, we pass the results
-      // BACK UP to the parent component App, and it gives this component
-      // new props to search with;
-      // it also needs these details to populate the breadcrumb trail
-      this.props.onViewArtist(res.data.id, res.data.name, res.data.genres, res.data.images);
-    });
+
+    this.props.onViewArtist( rec.artists[0].id );
 
   } // viewRecommendedArtist
 

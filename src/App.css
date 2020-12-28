@@ -23,3 +23,39 @@ form button {
     outline: none;
     border-bottom: 1px solid white;
 }
+
+#status {
+  padding-top: 20px;
+  font-weight: bold;
+}
+
+
+
+#trail {
+  margin: 20px 0;
+  font-size: 14px;
+}
+
+#trail ul.trail {
+  display: inline-block;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+#trail li {
+  display: inline-block;
+}
+
+#trail li a {
+  color: white;
+}
+
+#trail li a:hover {
+  color: var(--highlight);
+  cursor: pointer;
+}
+
+#trail li span {
+  padding: 0 4px; /* separator */
+}

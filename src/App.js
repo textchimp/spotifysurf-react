@@ -10,8 +10,8 @@ import api from './lib/api';
 
 class App extends React.Component {
 
-  // only need this constructor() function so we can create a
-  // ref to the search form
+  // Only need this constructor() function so we can create a
+  // ref to the search form using 'createRef'
   constructor(props){
     super(props);
 
@@ -28,7 +28,7 @@ class App extends React.Component {
   } // constructor
 
 
-  componentDidMount(){
+  componenttDidMount(){
 
     this.searchInput.current.focus();
 
@@ -83,20 +83,36 @@ class App extends React.Component {
   }
 
 
+  loadArtist = (id) => {
+
+    // Because this artist has been selected from a recommendation (or from a
+    // breadcrumb trail click), we don't have the artist image & genres as we do
+    // from a search result; so first we have to get the artist details, and then
+     // we can load the Top Tracks and Recommendations, as usual
+    api.getArtistInfo( id, this.setErrorMsg )
+    .then( ({data: a}) => this.setCurrentArtist(a.id, a.name, a.genres, a.images) );
+
+  } // loadArtist
+
+
   render(){
 
     return (
       <div className="App">
+
         <form onSubmit={this.handleSubmit}>
           <input type="text"
-            onChange={this.handleChange} placeholder="artist search"
-            ref={ this.searchInput }
-            id="searchText"
+           id="searchText"
+           placeholder="artist search"
+           onChange={this.handleChange}
+           ref={ this.searchInput }
           />
           <button>Go</button>
         </form>
 
-        <div>{ this.state.errorMsg }</div>
+        <div id="status">{ this.state.errorMsg }</div>
+
+        <BreadcrumbTrail trail={ this.state.breadcrumbTrail } onClick={ this.loadArtist } />
 
         {
           this.state.currentArtist.id !== undefined
@@ -104,7 +120,7 @@ class App extends React.Component {
           <ArtistDetails
            artist={ this.state.currentArtist }
            onError={ this.setErrorMsg }
-           onViewArtist={ this.setCurrentArtist }
+           onViewArtist={ this.loadArtist }
           />
         }
 
@@ -112,9 +128,9 @@ class App extends React.Component {
           this.state.search.length > 0
           &&
           <SearchResults
-            searchText={ this.state.search }
-            onArtistSelect={ this.setCurrentArtist }
-            onError={ this.setErrorMsg }
+           searchText={ this.state.search }
+           onArtistSelect={ this.setCurrentArtist }
+           onError={ this.setErrorMsg }
           />
         }
 
@@ -123,5 +139,32 @@ class App extends React.Component {
   } // render
 
 } // class App
+
+
+const BreadcrumbTrail = ({trail, onClick}) => {
+
+  if( trail.length < 2 ){
+    return null;
+  }
+
+  return (
+    <div id="trail">
+    <strong>Trail</strong>: &nbsp;
+    <ul className="trail">
+    {
+      trail.map( (artist, i) => {
+        // Don't show last (current) item
+        return i === trail.length-1 ? null : (
+          <li>
+            <a onClick={ () => onClick(artist.id) } href="#">{ artist.name }</a>
+            { i < trail.length-2 && <span>&gt;</span> }
+          </li>
+        );
+      })
+    }
+    </ul>
+    </div>
+  );
+}; // BreadcrumbTrail
 
 export default App;

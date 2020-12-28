@@ -66,33 +66,3 @@ li img{
   font-size: 14pt;
   color: orange;
 }
-
-#trail {
-  display: none;
-  margin-top: 10px;
-  font-size: 14px;
-}
-
-#trail ul.trail {
-  display: inline-block;
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-}
-
-#trail li {
-  display: inline-block;
-}
-
-#trail li a {
-  color: white;
-}
-
-#trail li a:hover {
-  color: var(--highlight);
-  cursor: pointer;
-}
-
-#trail li span {
-  padding: 0 4px; /* separator */
-}
