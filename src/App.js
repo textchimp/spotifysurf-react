@@ -6,6 +6,7 @@ import ArtistDetails from './ArtistDetails';
 
 // Testing only
 import axios from 'axios';
+
 import api from './lib/api';
 
 class App extends React.Component {
@@ -51,7 +52,6 @@ class App extends React.Component {
       console.warn('api.getToken(): FAILED to get initial token', err);
       this.setState({ errorMsg: 'Error loading API token. Sorry!' });
     });
-    // axios.defaults.headers.common.Authorization = 'Bearer ' + SPOTIFY_TOKEN;
 
   } //componentDidMount
 

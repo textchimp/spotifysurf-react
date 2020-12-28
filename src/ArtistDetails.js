@@ -114,14 +114,14 @@ class ArtistDetails extends React.Component {
         return; // ignore when nothing is playing
       }
 
-      // if( nowPlaying.index >= 100 ){
-      //   // recommended track (they all have 100 added to index):
-      //   window.open( $(nowPlaying.elem).attr('artist-url') );
-      // } else {
-      //   // current artist:
-      //   window.open( $(nowPlaying.elem).attr('track-url') );
-      //   ui.playPauseCurrent();  // stop playing because Spotify track page autoplays 🙄
-      // }
+      if( nowPlaying.index >= 10 ){
+        // recommended track
+        window.open( nowPlaying.track.artists[0].external_urls.spotify );
+      } else {
+        // current artist track
+        window.open( nowPlaying.track.external_urls.spotify );
+        player.fadeOut( nowPlaying.audio ); // stop playing because Spotify track page autoplays 🙄
+      }
       break;
 
     case 'ArrowLeft':
