@@ -1,6 +1,9 @@
 import React from 'react';
 
+// REMOVE except for testing!
 import api from './lib/api';
+
+import './SearchResults.css';
 
 class SearchResults extends React.Component {
 
@@ -24,10 +27,15 @@ class SearchResults extends React.Component {
     return (
       <div>
         <h3>Results for <em>{ this.props.searchText }</em></h3>
-        <ul>
+        <ul id="resultsList">
           { this.state.results.map( a => (
-            <li key={a.id} onClick={ () => this.props.onArtistSelect(a.id, a.name) }>
-              { a.name }
+            <li className="result"
+             key={a.id}
+             style={{ backgroundImage: getImageURL(a) }}
+             onClick={ () => this.props.onArtistSelect(a.id, a.name, a.genres, a.images) }>
+              <div className="name">
+                <strong>{ a.name }</strong>
+              </div>
             </li>
           )) }
         </ul>
@@ -36,5 +44,15 @@ class SearchResults extends React.Component {
   } // render
 
 } // class SearchResults
+
+
+
+const getImageURL = (artist) => {
+  if( 'images' in artist  &&  artist.images.length > 0 ){
+    return 'url(' + artist.images[0].url + ')';  // length-1 for smallest?
+  }
+  return '';
+};
+
 
 export default SearchResults;

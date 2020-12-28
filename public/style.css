@@ -1,4 +1,11 @@
+* {
+  box-sizing: border-box;
+}
+
 body {
-  color: white;
+  font-family: 'Lucida Console', sans-serif;
   background-color: black;
+  color: #b7b7b7;
+  --highlight: rgb(73, 85, 255);
+  padding: 10px;
 }

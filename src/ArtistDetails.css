@@ -1,11 +1,157 @@
 /* NOT scoped to component! */
 
-.tracks, .recs {
-  display: inline-block;
-  width: 40%;
-  vertical-align: top;
+#details .heading {
+  background-color: rgba(31, 31, 31, 0.93);
+  margin-bottom: 10px;
+  padding: 8px;
 }
 
-.clickable {
+#details .rec .goto {
+  display: none;
+  position: absolute;
+  right: 0;
+  width: 30%;
+  text-align: right;
+  padding-right: 10px;
+}
+
+#details .rec:hover .goto {
+  display: inline-block;
   cursor: pointer;
+}
+
+#details .rec:hover .goto:hover {
+  color: var(--highlight);
+}
+
+#details {
+  margin-top: 20px;
+  padding: 12px;
+  min-height: 20vh;
+  background-color: rgb(31, 31, 31);
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+#details .genres {
+  /* width: 63%; */
+  display: inline-block;
+  font-size: 14px;
+}
+
+#details .grid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: 1fr 1fr;
+  gap: 2%;
+}
+
+#details .topTracks, #details .recs {
+  background-color: rgba(31, 31, 31, 0.93);
+  padding: 10px;
+  display: inline-block;
+}
+
+#details .topTracks li{
+  margin-bottom: 4px;
+}
+
+#details .topTracks li em{
+  font-size: 14px;
+}
+
+#details .recs ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+#details .recs ul {
+  font-size: 14px;
+}
+
+#details h2 {
+  /* margin: 3px 0; */
+  margin: 4px 20px 8px 0;
+  display: inline-block;
+  /* border: 1px solid red; */
+}
+
+#details h2 a {
+  text-decoration: none;
+  color: white ;
+}
+
+#details h2 a:hover {
+  color: var(--highlight);
+  cursor: pointer;
+  /* color: white; */
+}
+
+
+
+
+#details h4 {
+  margin: 3px 0;
+}
+
+#details .topTracks ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+
+li.player {
+  cursor: pointer;
+}
+
+li.player.hasPreview:hover {
+  color: white;
+}
+
+li.player.noPreview {
+  color: #666;
+  cursor: default;
+}
+
+li.rec {
+  margin-bottom: 4px;
+  position: relative;
+}
+
+
+.controls {
+  padding-right: 6px;
+}
+
+.nocontrols {
+  color: #444;
+}
+
+li.playing .controls::after {
+  content: '\2590\2590'; /* pause symbol */
+  font-size: 11pt; /* the pause symbol is larger than play */
+  margin-left: -5px; /* fix alignment hack */
+}
+
+.controls::after {
+  content: '\25B6'; /* play symbol */
+  font-size: 14px;
+}
+
+li .trackName {
+  display: none;
+  font-style: italic;
+}
+
+li.playing .trackName {
+  display: inline;
+}
+
+li.playing {
+  animation: 0.5s infinite alternate pulse;
+  /* current track pulses to indicate playing */
+}
+@keyframes pulse {
+  from { color: #b7b7b7; }
+  to   { color: #ffffff; }
 }

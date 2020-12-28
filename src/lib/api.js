@@ -50,9 +50,13 @@ const api = {
   }, // getArtistTopTracks
 
 
-  getArtistRecommendations( id, errorHandler ){
+  getArtistRecommendations( id, energy, errorHandler ){
+    const params = { seed_artists: id };
+    if( energy ){
+      params.instrumentalness = energy;
+    }
     return axios.get(SPOTIFY_BASE_URL + 'recommendations', {
-      params:  { seed_artists: id },
+      params:  params,
     })
     .catch( e  => {
       console.log('CATCH getArtistRecommendations (API)');

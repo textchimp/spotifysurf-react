@@ -1,5 +1,5 @@
 import React from 'react';
-// import './App.css';
+import './App.css';
 
 import SearchResults from './SearchResults';
 import ArtistDetails from './ArtistDetails';
@@ -13,8 +13,7 @@ class App extends React.Component {
   state = {
     query: 'metz',
     search: '',
-    currentArtistID: '',
-    currentArtistName: '',
+    currentArtist: {},
     errorMsg: '',
     breadcrumbTrail: []
   };
@@ -50,8 +49,8 @@ class App extends React.Component {
     this.setState({ query: ev.target.value });
   }
 
-  setCurrentArtist = (id, name) => {
-    this.setState({ currentArtistID: id, currentArtistName: name });
+  setCurrentArtist = (id, name, genres, images) => {
+    this.setState({ currentArtist: { id, name, genres, images } });
   }
 
   // A method to pass to API call methods (via child component props)
@@ -72,19 +71,22 @@ class App extends React.Component {
   return (
       <div className="App">
         <form onSubmit={this.handleSubmit}>
-          <input type="text" onChange={this.handleChange} placeholder="artist search" value="metz" />
+          <input type="text"
+            onChange={this.handleChange} placeholder="artist search"
+            id="searchText"
+            value="metz"
+          />
           <button>Go</button>
         </form>
 
         <div>{ this.state.errorMsg }</div>
 
         {
-          this.state.currentArtistID.length > 0
+          this.state.currentArtist.id !== undefined
           &&
           <ArtistDetails
-            id={ this.state.currentArtistID }
-            name={ this.state.currentArtistName }
-            onError={ this.setErrorMsg }
+           artist={ this.state.currentArtist } 
+           onError={ this.setErrorMsg }
           />
         }
 

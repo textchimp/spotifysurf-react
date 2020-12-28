@@ -1,0 +1,98 @@
+
+
+ul#resultsList {
+  padding-left: 4px;
+  display: grid;
+  grid-gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  grid-auto-rows: minmax(100px, auto);
+}
+
+#resultsList strong{
+  color: #CCC;
+  font-size: 100%;
+  line-height: 100%;
+  font-weight: normal;
+}
+
+li.result {
+  list-style-type: none;
+  cursor: pointer;
+  min-width: 100px;
+  min-height: 100px;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+li.result .name {
+  /* info */
+  background-color: rgba(20, 20, 20, 0.92);
+  /* height: 30%; */
+  width: 100%;
+  display: inline-block;
+  padding: 6px;
+}
+
+li.result:hover .name {
+  height: 100%
+}
+
+
+li.result .stats {
+  font-size: 9pt;
+  display: none; /* hide for now */
+}
+
+#query {
+  color: var(--highlight);
+}
+
+#results li:hover > div {
+  background-color: rgba(20, 20, 20, 1.0);
+  height: 100%;
+}
+
+li img{
+  max-width: 90%;
+}
+
+#results h2{
+  font-weight: normal;
+}
+
+#status {
+  margin-top: 10px;
+  display: none;
+  font-size: 14pt;
+  color: orange;
+}
+
+#trail {
+  display: none;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+#trail ul.trail {
+  display: inline-block;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+#trail li {
+  display: inline-block;
+}
+
+#trail li a {
+  color: white;
+}
+
+#trail li a:hover {
+  color: var(--highlight);
+  cursor: pointer;
+}
+
+#trail li span {
+  padding: 0 4px; /* separator */
+}
