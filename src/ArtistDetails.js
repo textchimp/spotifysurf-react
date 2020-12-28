@@ -16,13 +16,14 @@ class ArtistDetails extends React.Component {
     tracks: [],
     recommendations: [],
     nowPlaying: {},
-    lastPlaying: null,
+    lastPlaying: {},
     sliders: {
       energy: null,
     },
     loadingMsg: 'Loading artist...'
   };
 
+  audioPlayers = [];
 
   fetchDetails(){
 
@@ -37,8 +38,13 @@ class ArtistDetails extends React.Component {
 
 
   componentDidMount(){
+
     console.log('<ArtistDetails>', this.props.artist.id);
     this.fetchDetails();
+
+    // listen for keypresses to control audio playback
+    window.addEventListener('keydown', this.handleKeyDown);
+
   } // componentDidMount
 
 
@@ -49,6 +55,120 @@ class ArtistDetails extends React.Component {
       this.fetchDetails();
     }
   } // componentDidUpdate
+
+
+  componentWillUnmount() {
+    // clean up
+    window.removeEventListener('keydown', this.handleKeyDown);
+  }
+
+
+  handleKeyDown = (ev) => {
+    if( ev.target.id === 'searchText' ){
+      return; // ignore typing into search form
+    }
+    console.log('handleKeyDown()', ev);
+
+    let preventDefault = true;
+    const {nowPlaying, lastPlaying} = this.state;
+
+
+    // TODO: moving left/right between tracks too quickly occasionally
+    // prevents the last track from pausing before the next one starts...
+    // need a throttle timeout to prevent moving too quickly
+
+    switch( ev.key ){
+
+    case ' ':
+      // Spacebar toggles current audio playback, or starts current artist track
+
+      if(nowPlaying.audio === undefined ){
+
+        if(lastPlaying.audio === undefined ){
+          // start playing the first of the artist tracks (using the array of
+          // audio tag refs)
+          player.fadeIn( this.audioPlayers[0] );
+          this.setState({
+            nowPlaying: {
+              track: this.state.tracks[0],
+              audio: this.audioPlayers[0],
+              index: 0 }
+          });
+        } else {
+          // play last playing track
+          player.fadeIn(lastPlaying.audio);
+          this.setState({ nowPlaying: {...lastPlaying} });
+        }
+
+      } else {
+        // nowPlaying is set, i.e. audio is playing - pause current track
+        player.fadeOut(nowPlaying.audio);
+        this.setState({ lastPlaying: {...nowPlaying}, nowPlaying: {} });
+      }
+      break;
+
+    case 'Enter':
+      // Enter opens the currently playing track as a new Spotify tab
+
+      if( this.state.nowPlaying.audio === undefined ){
+        return; // ignore when nothing is playing
+      }
+
+      // if( nowPlaying.index >= 100 ){
+      //   // recommended track (they all have 100 added to index):
+      //   window.open( $(nowPlaying.elem).attr('artist-url') );
+      // } else {
+      //   // current artist:
+      //   window.open( $(nowPlaying.elem).attr('track-url') );
+      //   ui.playPauseCurrent();  // stop playing because Spotify track page autoplays 🙄
+      // }
+      break;
+
+    case 'ArrowLeft':
+      // Play previous track
+      const { prevAudio, prevIndex } = player.playPreviousTrack( nowPlaying, this.audioPlayers );
+      if( prevIndex === null ){
+        return; // none found
+      }
+
+      this.setState({
+        nowPlaying: {
+          // indexes 0-9 are artist tracks, 10-29 are recommendations
+          track: prevIndex < 10 ? this.state.tracks[prevIndex] : this.state.recommendations[prevIndex-10],
+          audio: prevAudio,
+          index: prevIndex
+        }
+      });
+
+      break;
+
+    case 'ArrowRight':
+      // Play next track
+      const { nextAudio, nextIndex } = player.playNextTrack( nowPlaying, this.audioPlayers );
+      if( nextIndex === null ){
+        return; // none found
+      }
+
+      this.setState({
+        nowPlaying: {
+          // indexes 0-9 are artist tracks, 10-29 are recommendations
+          track: nextIndex < 10 ? this.state.tracks[nextIndex] : this.state.recommendations[nextIndex-10],
+          audio: nextAudio,
+          index: nextIndex
+        }
+      });
+
+      break;
+
+    default:
+      preventDefault = false; // stop preventDefault() from running, below
+    } // switch
+
+    // If we don't preventDefault() for unused keys,
+    // shorts for reload, open dev tools etc stop working!
+    preventDefault && ev.preventDefault();
+
+  } // handleKeyDown
 
 
   updateSlider = (ev) => {
@@ -69,6 +189,11 @@ class ArtistDetails extends React.Component {
 
 
   handleTrackClick = (ev, track, index) => {
+
+    if( !this.audioPlayers[index] ){
+      return; // ignore click on items without audio previews (need 'goto' link to work)
+    }
+
     // Get the audio element; it's the first child of the <li>
     // TODO: is there a neater way to do this? - ideally avoid arrow fns in render JSX
     const audio = ev.currentTarget.firstElementChild;
@@ -79,7 +204,8 @@ class ArtistDetails extends React.Component {
       player.fadeOut( nowPlaying.audio );
       if( nowPlaying.track.id === track.id ){
         // if we just clicked the currently-playing track, don't start it again below
-        this.setState({ nowPlaying: {} });
+
+        this.setState({ lastPlaying: {...this.state.nowPlaying}, nowPlaying: {} });
         return;
       }
     }
@@ -99,6 +225,14 @@ class ArtistDetails extends React.Component {
   }
 
   render(){
+
+    // console.log('BEFORE audioPlayers', this.audioPlayers);
+    //
+    //
+    // this.audioPlayers = []; // empty before rendering, since we rely on skipping missing audio
+    // window.a = this.audioPlayers;
+    //
+    // console.log('audioPlayers', this.audioPlayers);
 
     return (
       <div id="details" style={{ backgroundImage: getImageURL(this.props.artist.images) }}>
@@ -124,10 +258,13 @@ class ArtistDetails extends React.Component {
                    ${this.state.nowPlaying.track && this.state.nowPlaying.track.id === t.id ? 'playing' : '' }
                   `}
                  onClick={ (e) => this.handleTrackClick(e, t, i) } >
-                  <audio index={ i }>
-                    <source type="audio/mpeg" src={ t.preview_url } />
-                  </audio>
-                  <span className="controls" id={`controls${ i }`}></span>
+                  { t.preview_url ?
+                    <audio ref={ (ref) => this.audioPlayers[i] = ref }>
+                      <source type="audio/mpeg" src={ t.preview_url } />
+                    </audio>
+                    : ''
+                  }
+                  <span className="controls" />
                   <em>{ t.name }</em>
                 </li>
               ))
@@ -151,14 +288,17 @@ class ArtistDetails extends React.Component {
                  ${rec.preview_url ? 'hasPreview' : 'noPreview'}
                  ${this.state.nowPlaying.track && this.state.nowPlaying.track.id === rec.id ? 'playing' : '' }
                 `}
-               onClick={ (e) => this.handleTrackClick(e, rec, i) } >
-                <audio index={ i }>
-                  <source type="audio/mpeg" src={ rec.preview_url } />
-                </audio>
-                <span className="controls" id={`controls${ i }`}></span>
+               onClick={ (e) => this.handleTrackClick(e, rec, i + 10) } >
+               { rec.preview_url ?
+                  <audio ref={ (ref) => this.audioPlayers[i+10] = ref }>
+                    <source type="audio/mpeg" src={ rec.preview_url } />
+                  </audio>
+                  : ''
+               }
+                <span className="controls" />
                 &nbsp; { rec.artists[0].name } &nbsp;
                 <span className="trackName">– { rec.name }</span>
-                <span class="goto" onClick={ (ev) => this.gotoRecommendedArtist(ev, rec) }>view</span>
+                <span className="goto" onClick={ (ev) => this.gotoRecommendedArtist(ev, rec) }>view</span>
               </li>
             ))
             }
@@ -171,7 +311,60 @@ class ArtistDetails extends React.Component {
 
 } // class ArtistDetails
 
+
 const player = {
+
+  playPreviousTrack( nowPlaying, audioPlayers ){
+
+    if( nowPlaying.track === undefined ){
+      return {prevAudio: null, prevIndex: null};
+    }
+
+    let prevIndex = nowPlaying.index - 1;
+    let prevAudio = audioPlayers[ prevIndex ];
+
+    while( prevIndex >= 0 && !prevAudio ){
+      prevIndex--;
+      prevAudio = audioPlayers[ prevIndex ];
+    }
+
+    if( !prevAudio ){
+      return {prevAudio: null, prevIndex: null}; // start of list
+    }
+
+    // stop current, start next
+    this.fadeOut( nowPlaying.audio );
+    this.fadeIn( prevAudio );
+
+    return { prevAudio, prevIndex };
+  }, // playPreviousTrack
+
+
+  playNextTrack( nowPlaying, audioPlayers ){
+
+    if( nowPlaying.track === undefined ){
+      return {prevAudio: null, prevIndex: null};
+    }
+
+    let nextIndex = nowPlaying.index + 1;
+    let nextAudio = audioPlayers[ nextIndex ];
+
+    while( nextIndex < audioPlayers.length && !nextAudio ){
+      nextIndex++;
+      nextAudio = audioPlayers[ nextIndex ];
+    }
+
+    if( !nextAudio ){
+      return {nextAudio: null, nextIndex: null}; // start of list
+    }
+
+    // stop current, start next
+    this.fadeOut( nowPlaying.audio );
+    this.fadeIn( nextAudio );
+
+    return { nextAudio, nextIndex };
+  }, // playNextTrack
+
 
   fadeOut( audio ){
     // Pasted from https://stackoverflow.com/a/36900986

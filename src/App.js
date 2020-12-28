@@ -10,16 +10,27 @@ import api from './lib/api';
 
 class App extends React.Component {
 
-  state = {
-    query: 'metz',
-    search: '',
-    currentArtist: {},
-    errorMsg: '',
-    breadcrumbTrail: []
-  };
+  // only need this constructor() function so we can create a
+  // ref to the search form
+  constructor(props){
+    super(props);
+
+    this.state = {
+      query: 'metz',
+      search: '',
+      currentArtist: {},
+      errorMsg: '',
+      breadcrumbTrail: []
+    };
+
+    this.searchInput = React.createRef(); // control focus/blur of form input
+
+  } // constructor
 
 
   componentDidMount(){
+
+    this.searchInput.current.focus();
 
     // Testing only
     const params = new URLSearchParams(window.location.search);
@@ -62,8 +73,10 @@ class App extends React.Component {
 
   handleSubmit = (ev) => {
     ev.preventDefault();
-    // copy to query text to 'search', which triggers <SearchResults>
+    // copy query text to 'search', which triggers <SearchResults>
     this.setState({ search: this.state.query });
+
+    this.searchInput.current.blur(); // blur form so keypresses work to control audio
   }
 
   render(){
@@ -73,8 +86,8 @@ class App extends React.Component {
         <form onSubmit={this.handleSubmit}>
           <input type="text"
             onChange={this.handleChange} placeholder="artist search"
+            ref={ this.searchInput }
             id="searchText"
-            value="metz"
           />
           <button>Go</button>
         </form>
@@ -85,7 +98,7 @@ class App extends React.Component {
           this.state.currentArtist.id !== undefined
           &&
           <ArtistDetails
-           artist={ this.state.currentArtist } 
+           artist={ this.state.currentArtist }
            onError={ this.setErrorMsg }
           />
         }

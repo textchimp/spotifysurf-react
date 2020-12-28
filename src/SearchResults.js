@@ -17,10 +17,19 @@ class SearchResults extends React.Component {
 
     api.getSearchResults( this.props.searchText, this.props.onError )
     .then( res => this.setState({ results: res.data.artists.items }) )
-
     // .catch( e => { console.log('CATCH 1 (component)'); }) // THIS NEVER RUNS!
 
   } // componentDidMount
+
+
+    componentDidUpdate(prevProps, prevState){
+      if( this.props.searchText !== prevProps.searchText ){
+        // re-submit search when search text prop changes
+        this.setState({ results: [] }); // clear old results
+        api.getSearchResults( this.props.searchText, this.props.onError )
+        .then( res => this.setState({ results: res.data.artists.items }) )
+      }
+    } // componentDidUpdate
 
   render(){
 

@@ -111,7 +111,13 @@ li.player.hasPreview:hover {
 li.player.noPreview {
   color: #666;
   cursor: default;
+  /* pointer-events: none; */    /* TODO: this breaks the 'goto' link in the li */
 }
+
+li.player.noPreview span.controls, li.player.noPreview span.trackName {
+  /* pointer-events: none; */
+}
+
 
 li.rec {
   margin-bottom: 4px;
