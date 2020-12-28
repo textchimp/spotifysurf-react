@@ -219,10 +219,32 @@ class ArtistDetails extends React.Component {
     window.open( this.state.tracks[0].artists[0].external_urls.spotify );
   }
 
-  gotoRecommendedArtist = (ev, rec) => {
-    ev.stopPropagation(); // do not treat as track play/pause click
-    window.open( rec.external_urls.spotify );
+
+  openRecommendedArtistInSpotify = () => {
+    // this should be for Enter key: window.open( rec.external_urls.spotify );
   }
+
+
+  viewRecommendedArtist = (ev, rec) => {
+    ev.stopPropagation(); // do not treat as track play/pause click
+    console.log('view', rec.artists[0].id);
+    // Because this artist has been selected from a recommendation
+    // (or from a breadcrumb trail click),
+    // we don't have the artist image & genres as we do from a search result;
+    // so first we have to get the artist details, and then we can
+    // load the Top Tracks and Recommendations, as usual
+    api.getArtistInfo( rec.artists[0].id, this.props.onError )
+    .then( res => {
+      // This is kind of weird, but since we can't change props and we use
+      // props to load the artist tracks & recs, we pass the results
+      // BACK UP to the parent component App, and it gives this component
+      // new props to search with;
+      // it also needs these details to populate the breadcrumb trail
+      this.props.onViewArtist(res.data.id, res.data.name, res.data.genres, res.data.images);
+    });
+
+  } // viewRecommendedArtist
+
 
   render(){
 
@@ -298,7 +320,7 @@ class ArtistDetails extends React.Component {
                 <span className="controls" />
                 &nbsp; { rec.artists[0].name } &nbsp;
                 <span className="trackName">– { rec.name }</span>
-                <span className="goto" onClick={ (ev) => this.gotoRecommendedArtist(ev, rec) }>view</span>
+                <span className="goto" onClick={ (ev) => this.viewRecommendedArtist(ev, rec) }>view</span>
               </li>
             ))
             }

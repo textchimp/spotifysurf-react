@@ -66,6 +66,17 @@ const api = {
   }, // getArtistTopTracks
 
 
+  getArtistInfo( id, errorHandler ){
+
+    return axios.get( SPOTIFY_BASE_URL + `artists/${id}` )
+    .catch( e  => {
+      console.log('CATCH getArtistInfo (API)');
+      return this.handleRequestError(e, { request: 'getArtistInfo', args: [id], errorHandler }) ;
+    });
+
+  }, // getArtistInfo
+
+
   handleRequestError( err, req ){
 
     if( err.response.status !== 401 ){

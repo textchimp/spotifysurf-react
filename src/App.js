@@ -60,8 +60,12 @@ class App extends React.Component {
     this.setState({ query: ev.target.value });
   }
 
+
   setCurrentArtist = (id, name, genres, images) => {
-    this.setState({ currentArtist: { id, name, genres, images } });
+    this.setState({
+      currentArtist: { id, name, genres, images },
+      breadcrumbTrail: [ ...this.state.breadcrumbTrail, { id, name } ]
+    });
   }
 
   // A method to pass to API call methods (via child component props)
@@ -75,13 +79,13 @@ class App extends React.Component {
     ev.preventDefault();
     // copy query text to 'search', which triggers <SearchResults>
     this.setState({ search: this.state.query });
-
     this.searchInput.current.blur(); // blur form so keypresses work to control audio
   }
 
+
   render(){
 
-  return (
+    return (
       <div className="App">
         <form onSubmit={this.handleSubmit}>
           <input type="text"
@@ -100,6 +104,7 @@ class App extends React.Component {
           <ArtistDetails
            artist={ this.state.currentArtist }
            onError={ this.setErrorMsg }
+           onViewArtist={ this.setCurrentArtist }
           />
         }
 
