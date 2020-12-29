@@ -220,6 +220,24 @@ class ArtistDetails extends React.Component {
   } // handleTrackClick
 
 
+  handleEndOfTrack = (ev) => {
+
+    const { nextAudio, nextIndex } = player.playNextTrack( this.state.nowPlaying, this.audioPlayers );
+    if( nextIndex === null ){
+      return; // none found
+    }
+
+    this.setState({
+      nowPlaying: {
+        // indexes 0-9 are artist tracks, 10-29 are recommendations
+        track: nextIndex < 10 ? this.state.tracks[nextIndex] : this.state.recommendations[nextIndex-10],
+        audio: nextAudio,
+        index: nextIndex
+      }
+    });
+
+  } // handleEndOfTrack
+
   viewRecommendedArtist = (ev, rec) => {
     ev.stopPropagation(); // do not treat as track play/pause click
     this.props.onViewArtist( rec.artists[0].id ); // send to parent to load via API
@@ -231,76 +249,47 @@ class ArtistDetails extends React.Component {
     return (
       <div id="details" style={{ backgroundImage: getImageURL(this.props.artist.images) }}>
         { /* <h2 className="loading">Loading artist...</h2> */ }
-        <div className="heading">
-          <h2>
-            <a id="artistName" target="_blank" rel="noreferrer"
-             href={
-               this.state.tracks.length > 0 ?
-               this.state.tracks[0].artists[0].external_urls.spotify
-               : undefined
-             }
-             title={ `View ${this.props.artist.name} on Spotify` }
-            >
-              { this.props.artist.name }
-            </a>
-          </h2>
-          <span className="genres">{ this.props.artist.genres && this.props.artist.genres.slice(0, 6).join(', ') }</span>
-        </div>
+
+        <Heading
+         name={ this.props.artist.name }
+         tracks={ this.state.tracks }
+         genres={ this.props.artist.genres } />
+
         <div className="grid">
           <div className="topTracks">
             <h4>Top Tracks</h4>
             <ul>
               {
-              this.state.tracks.map( (t, i) => (
-                <li key={ t.id }
-                 className={`
-                   player
-                   ${t.preview_url ? 'hasPreview' : 'noPreview'}
-                   ${this.state.nowPlaying.track && this.state.nowPlaying.track.id === t.id ? 'playing' : '' }
-                  `}
-                 onClick={ (e) => this.handleTrackClick(e, t, i) } >
-                  { t.preview_url ?
-                    <audio ref={ (ref) => this.audioPlayers[i] = ref }>
-                      <source type="audio/mpeg" src={ t.preview_url } />
-                    </audio>
-                    : ''
-                  }
-                  <span className="controls" />
-                  <em>{ t.name }</em>
-                </li>
+              this.state.tracks.map( (track, i) => (
+                <Track index={ i } key={ track.id }
+                 item={ track }
+                 nowPlaying={this.state.nowPlaying}
+                 clickHandler={ this.handleTrackClick }
+                 playerRefs={ this.audioPlayers }
+                 onTrackEnd={ this.handleEndOfTrack } >
+                   <em>{ track.name }</em>
+                </Track>
               ))
               }
             </ul>
           </div>{ /* div.topTracks */ }
           <div className="recs">
             <h4>Recommendations</h4>
-            {
-              /*
-              energy: <input type="range" name="energy" min="0.0" max="1.0" step="0.01" onMouseUp={ this.updateSlider } />
-              <br/>
-              */
-            }
+            { /* energy: <input type="range" name="energy" min="0.0" max="1.0" step="0.01" onMouseUp={ this.updateSlider } /> <br/> */ }
             <ul>
             {
             this.state.recommendations.map( (rec, i) => (
-              <li key={ rec.id }
-               className={`
-                 rec player
-                 ${rec.preview_url ? 'hasPreview' : 'noPreview'}
-                 ${this.state.nowPlaying.track && this.state.nowPlaying.track.id === rec.id ? 'playing' : '' }
-                `}
-               onClick={ (e) => this.handleTrackClick(e, rec, i + 10) } >
-               { rec.preview_url ?
-                  <audio ref={ (ref) => this.audioPlayers[i+10] = ref }>
-                    <source type="audio/mpeg" src={ rec.preview_url } />
-                  </audio>
-                  : ''
-               }
-                <span className="controls" />
-                &nbsp; { rec.artists[0].name } &nbsp;
-                <span className="trackName">– { rec.name }</span>
-                <span className="goto" onClick={ (ev) => this.viewRecommendedArtist(ev, rec) }>view</span>
-              </li>
+              <Track recClass="rec" key={ rec.id }
+               item={ rec }
+               index={ i+10 }
+               nowPlaying={ this.state.nowPlaying}
+               clickHandler={ this.handleTrackClick }
+               playerRefs={ this.audioPlayers }
+               onTrackEnd={ this.handleEndOfTrack } >
+                 &nbsp; { rec.artists[0].name } &nbsp;
+                 <span className="trackName">– { rec.name }</span>
+                 <span className="goto" onClick={ (ev) => this.viewRecommendedArtist(ev, rec) }>view</span>
+              </Track>
             ))
             }
             </ul>
@@ -400,6 +389,9 @@ const player = {
     }, 50);
   }, //audioFadeOut
 
+
+
+
 }; // player object
 
 
@@ -408,6 +400,48 @@ const getImageURL = (images) => {
     return 'url(' + images[0].url + ')';  // length-1 for smallest?
   }
   return '';
+};
+
+
+// Functional component for showing track info, including audio tag
+//   - makes main ArtistDetails component render shorter & dryer
+//   - works for both artist top tracks, and recommendations
+//   - but needs lots of props passed to it, including the audio refs
+//   - uses 'children' to allow customising of visible tags
+const Track = ({ item, index, nowPlaying, clickHandler, children, playerRefs, onTrackEnd, recClass }) => {
+  return (
+    <li
+     className={` player ${ recClass }
+       ${item.preview_url ? 'hasPreview' : 'noPreview'}
+       ${nowPlaying.index === index ? 'playing' : '' }
+      `}
+     onClick={ (e) => clickHandler(e, item, index) } >
+       { item.preview_url ?
+         <audio ref={ (ref) => playerRefs[index] = ref } onEnded={ onTrackEnd }>
+           <source type="audio/mpeg" src={ item.preview_url } />
+         </audio>
+         : undefined
+       }
+       <span className="controls" />
+       { children }
+    </li>
+  );
+};
+
+
+const Heading = ({ name, tracks, genres }) => {
+  return (
+    <div className="heading">
+      <h2>
+        <a id="artistName" target="_blank" rel="noreferrer"
+         href={ tracks.length > 0 ? tracks[0].artists[0].external_urls.spotify : undefined }
+         title={ `View ${name} on Spotify` } >
+           { name }
+        </a>
+      </h2>
+      <span className="genres">{ genres && genres.slice(0, 6).join(', ') }</span>
+    </div>
+  );
 };
 
 

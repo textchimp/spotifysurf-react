@@ -130,9 +130,9 @@ const api = {
     return axios.get(SPOTISURF_CLOUD_FUNCTION_TOKEN_URL)
     .then( res => {
 
-      axios.defaults.headers.common.Authorization = 'Bearer ' + res.data.token;
+      this.setToken( res.data.token );
 
-      console.log('%cnew token', 'font-size: 14pt; font-weight: bold;', res.data);
+      console.log('%crefreshed token', 'font-size: 14pt; font-weight: bold;', res.data);
       lastRequest.errorHandler && lastRequest.errorHandler(''); // clear error
 
       // re-attempt last API call with new token, to avoid user confusion or page reload:
@@ -147,7 +147,7 @@ const api = {
 
       // This throw prevents the 'then' handler from running in parent component,
       // i.e. by handling the current error with this catch() the promise
-      // would be resolved, by default 
+      // would be resolved, by default
       throw new Error('Unable to refresh API token');
     });
 

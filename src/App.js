@@ -73,6 +73,10 @@ class App extends React.Component {
 
 
   setCurrentArtist = (id, name, genres, images) => {
+    if( this.state.currentArtist.id === id ){
+      return; // edge case: ignore clicks on the artist already being viewed
+    }
+    
     this.setState({
       currentArtist: { id, name, genres, images },
       breadcrumbTrail: [ ...this.state.breadcrumbTrail, { id, name } ]
