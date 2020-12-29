@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+import { d } from './utils';
+
 export const SPOTIFY_TOKEN = "BQBpFndilXEda4OZZz4teiSDnBC8oliDTvqmFWaGfcEOqvpwphS6N1QjYcXcDC1b8hAdgRLPBpWA_l2GUjs";
 const SPOTIFY_BASE_URL = 'https://api.spotify.com/v1/';
 const SPOTISURF_CLOUD_FUNCTION_TOKEN_URL = 'https://us-central1-functions-test-24b29.cloudfunctions.net/spotisurf?test=1';
@@ -8,19 +10,33 @@ const SPOTISURF_CLOUD_FUNCTION_TOKEN_URL = 'https://us-central1-functions-test-2
 const api = {
 
   getToken(){
+    d( 'getToken' );
+
     return axios.get(SPOTISURF_CLOUD_FUNCTION_TOKEN_URL)
     .then( res => {
-      // this.headers.Authorization = 'Bearer ' + res.data.token;
       console.log('%cset init token %s', 'color: green; font-size: 14px;', res.data.token, );
-      axios.defaults.headers.common.Authorization = 'Bearer ' + res.data.token;
+      this.setToken( res.data.token );
       return true;
+    })
+    .catch( err => {
+      console.warn('api.getToken(): FAILED to get initial token', err);
+      throw new Error('api.getToken(): FAILED to get initial token'); // to trigger catch in calling component
     });
+
   }, // getToken
+
+
+  setToken( token ){
+    d( 'setToken', token );
+    axios.defaults.headers.common.Authorization = 'Bearer ' + token;
+    localStorage.setItem('spotifyToken', token); // TODO: test if available first?
+  },
 
 
   getSearchResults( text, errorHandler ){
     // 1. IF the query is successful, return the promise, which is handled
     // immediately by the .then() callback in the component (i.e. do a setState)
+    d( 'getSearchResults', {text, errorHandler} );
     return axios.get(SPOTIFY_BASE_URL + 'search', {
       params: {
         q: text,
@@ -39,6 +55,7 @@ const api = {
 
 
   getArtistTopTracks( id, errorHandler ){
+    d('getArtistTopTracks', {id, errorHandler});
     return axios.get(SPOTIFY_BASE_URL + `artists/${id}/top-tracks`, {
       params:  { country: 'AU' },
     })
@@ -51,6 +68,7 @@ const api = {
 
 
   getArtistRecommendations( id, energy, errorHandler ){
+    d('getArtistRecommendations', {id, energy, errorHandler});
     const params = { seed_artists: id };
     if( energy ){
       params.instrumentalness = energy;
@@ -67,7 +85,7 @@ const api = {
 
 
   getArtistInfo( id, errorHandler ){
-
+    d('getArtistInfo', {id, errorHandler});
     return axios.get( SPOTIFY_BASE_URL + `artists/${id}` )
     .catch( e  => {
       console.log('CATCH getArtistInfo (API)');
@@ -78,7 +96,7 @@ const api = {
 
 
   handleRequestError( err, req ){
-
+    d('handleRequestError', {err, req});
     if( err.response.status !== 401 ){
       console.dir( err );
       console.warn('API ERROR', req.request, err.status, err.statusText);
@@ -108,6 +126,7 @@ const api = {
     // secret keys which are not intended to be exposed to the frontend.
 
     // 4. Get new token and return promise to component making original API request
+    d('generateNewTokenAndRetry', {lastRequest});
     return axios.get(SPOTISURF_CLOUD_FUNCTION_TOKEN_URL)
     .then( res => {
 
@@ -122,9 +141,14 @@ const api = {
 
     })
     .catch( err => {
-      console.warn('TOKEN REFRESH FAIL', err.response.status, err.response.data);
+      console.warn('TOKEN REFRESH FAIL');
       console.dir(err);
-      // return/throw error?
+      lastRequest.errorHandler('Unable to refresh API token');
+
+      // This throw prevents the 'then' handler from running in parent component,
+      // i.e. by handling the current error with this catch() the promise
+      // would be resolved, by default 
+      throw new Error('Unable to refresh API token');
     });
 
   }, // generateNewTokenAndRetry

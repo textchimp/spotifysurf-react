@@ -16,8 +16,13 @@ class SearchResults extends React.Component {
     console.log('<SearchResults>', this.props.searchText);
 
     api.getSearchResults( this.props.searchText, this.props.onError )
-    .then( res => this.setState({ results: res.data.artists.items }) )
-    // .catch( e => { console.log('CATCH 1 (component)'); }) // THIS NEVER RUNS!
+    .then( res => this.setState({ results: res.data.artists.items }) );
+    // ☝️ this will run after the api code catches an error,
+    // (because whenever you catch, a resolved promise results) unless
+    // the catch (in generateNewTokenAndRetry) also throws an error
+
+    // .catch( e => { console.log('CATCH 1 (component)', e); })
+    // this doesn't run unless the API catch also throws an error
 
   } // componentDidMount
 

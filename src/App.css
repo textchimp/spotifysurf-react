@@ -25,8 +25,9 @@ form button {
 }
 
 #status {
-  padding-top: 20px;
-  font-weight: bold;
+  margin-top: 10px;
+  font-size: 14pt;
+  color: orange;
 }
 
 
@@ -47,11 +48,12 @@ form button {
   display: inline-block;
 }
 
-#trail li a {
+#trail li div {
   color: white;
+  display: inline;
 }
 
-#trail li a:hover {
+#trail li div:hover {
   color: var(--highlight);
   cursor: pointer;
 }

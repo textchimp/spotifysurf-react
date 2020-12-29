@@ -4,10 +4,10 @@ import './App.css';
 import SearchResults from './SearchResults';
 import ArtistDetails from './ArtistDetails';
 
-// Testing only
-import axios from 'axios';
-
 import api from './lib/api';
+
+window.DEBUG = true;
+
 
 class App extends React.Component {
 
@@ -21,7 +21,8 @@ class App extends React.Component {
       search: '',
       currentArtist: {},
       errorMsg: '',
-      breadcrumbTrail: []
+      breadcrumbTrail: [],
+      relatedArtists: [] // TODO: populate when viewing artist (in place of search results)
     };
 
     this.searchInput = React.createRef(); // control focus/blur of form input
@@ -29,7 +30,7 @@ class App extends React.Component {
   } // constructor
 
 
-  componenttDidMount(){
+  componentDidMount(){
 
     this.searchInput.current.focus();
 
@@ -43,14 +44,24 @@ class App extends React.Component {
 
     const token = params.get('token');
     if( token ){
-      axios.defaults.headers.common.Authorization = 'Bearer ' + token;
-      return;
+      api.setToken( token );
+      return; // don't fetch below
     }
 
+    // TODO: test if localStorageToken available first?
+    const localStorageToken = localStorage.getItem('spotifyToken');
+    if( localStorageToken ){
+      console.log('localStorageToken loaded');
+      api.setToken( localStorageToken );
+      return; // don't fetch token remotely, below
+    }
+
+
+    // Get token from Cloud Function endpoint
     api.getToken()
     .catch( err => {
-      console.warn('api.getToken(): FAILED to get initial token', err);
       this.setState({ errorMsg: 'Error loading API token. Sorry!' });
+      // this.searchInput.current.disabled = true;
     });
 
   } //componentDidMount
@@ -67,6 +78,7 @@ class App extends React.Component {
       breadcrumbTrail: [ ...this.state.breadcrumbTrail, { id, name } ]
     });
   }
+
 
   // A method to pass to API call methods (via child component props)
   // so they can set and clear the 'generating new token' message
@@ -156,7 +168,7 @@ const BreadcrumbTrail = ({trail, onClick}) => {
         // Don't show last (current) item
         return i === trail.length-1 ? null : (
           <li key={ artist.id }>
-            <a onClick={ () => onClick(artist.id) } href="#">{ artist.name }</a>
+            <div onClick={ () => onClick(artist.id) }>{ artist.name }</div>
             { i < trail.length-2 && <span>&gt;</span> }
           </li>
         );

@@ -59,10 +59,3 @@ li img{
 #results h2{
   font-weight: normal;
 }
-
-#status {
-  margin-top: 10px;
-  display: none;
-  font-size: 14pt;
-  color: orange;
-}

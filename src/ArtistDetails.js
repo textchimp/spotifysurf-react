@@ -17,13 +17,11 @@ class ArtistDetails extends React.Component {
     recommendations: [],
     nowPlaying: {},
     lastPlaying: {},
-    sliders: {
-      energy: null,
-    },
+    sliders: { energy: null },
     loadingMsg: 'Loading artist...'
   };
 
-  audioPlayers = [];
+  audioPlayers = []; // to store audio player tags as 'refs'
 
   fetchDetails(){
 
@@ -31,9 +29,8 @@ class ArtistDetails extends React.Component {
       player.fadeOut( this.state.nowPlaying.audio );
     }
 
-    this.setState({ nowPlaying: {}, lastPlaying: {} });
+    this.setState({ nowPlaying: {}, lastPlaying: {} }); // clear playing details
 
-    console.log('fetchDetails', this);
     api.getArtistTopTracks( this.props.artist.id, this.props.onError )
     .then( res => this.setState({ tracks: res.data.tracks, loadingMsg: '' }) );
 
@@ -73,7 +70,7 @@ class ArtistDetails extends React.Component {
     if( ev.target.id === 'searchText' ){
       return; // ignore typing into search form
     }
-    console.log('handleKeyDown()', ev);
+    // console.log('handleKeyDown()', ev);
 
     let preventDefault = true;
     const {nowPlaying, lastPlaying} = this.state;
@@ -214,48 +211,36 @@ class ArtistDetails extends React.Component {
         this.setState({ lastPlaying: {...this.state.nowPlaying}, nowPlaying: {} });
         return;
       }
-    }
+
+    } // if already playing
 
     player.fadeIn( audio );
     this.setState({ nowPlaying: { track, audio, index } });
+
   } // handleTrackClick
-
-
-  openArtistInSpotify = () => {
-    window.open( this.state.tracks[0].artists[0].external_urls.spotify );
-  }
-
-
-  openRecommendedArtistInSpotify = () => {
-    // this should be for Enter key: window.open( rec.external_urls.spotify );
-  }
 
 
   viewRecommendedArtist = (ev, rec) => {
     ev.stopPropagation(); // do not treat as track play/pause click
-    console.log('view', rec.artists[0].id);
-
-    this.props.onViewArtist( rec.artists[0].id );
-
+    this.props.onViewArtist( rec.artists[0].id ); // send to parent to load via API
   } // viewRecommendedArtist
 
 
   render(){
-
-    // console.log('BEFORE audioPlayers', this.audioPlayers);
-    //
-    //
-    // this.audioPlayers = []; // empty before rendering, since we rely on skipping missing audio
-    // window.a = this.audioPlayers;
-    //
-    // console.log('audioPlayers', this.audioPlayers);
 
     return (
       <div id="details" style={{ backgroundImage: getImageURL(this.props.artist.images) }}>
         { /* <h2 className="loading">Loading artist...</h2> */ }
         <div className="heading">
           <h2>
-            <a id="artistName" target="_blank" href="#" onClick={ this.openArtistInSpotify } title={`View ${this.props.artist.name} on Spotify`}>
+            <a id="artistName" target="_blank" rel="noreferrer"
+             href={
+               this.state.tracks.length > 0 ?
+               this.state.tracks[0].artists[0].external_urls.spotify
+               : undefined
+             }
+             title={ `View ${this.props.artist.name} on Spotify` }
+            >
               { this.props.artist.name }
             </a>
           </h2>
