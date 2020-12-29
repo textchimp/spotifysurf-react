@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "/spotifysurf-react/static/css/main.3857f044.chunk.css",
+    "main.js": "/spotifysurf-react/static/js/main.d88fff02.chunk.js",
+    "main.js.map": "/spotifysurf-react/static/js/main.d88fff02.chunk.js.map",
+    "runtime-main.js": "/spotifysurf-react/static/js/runtime-main.4817111f.js",
+    "runtime-main.js.map": "/spotifysurf-react/static/js/runtime-main.4817111f.js.map",
+    "static/js/2.eede1ee3.chunk.js": "/spotifysurf-react/static/js/2.eede1ee3.chunk.js",
+    "static/js/2.eede1ee3.chunk.js.map": "/spotifysurf-react/static/js/2.eede1ee3.chunk.js.map",
+    "static/js/3.b6954064.chunk.js": "/spotifysurf-react/static/js/3.b6954064.chunk.js",
+    "static/js/3.b6954064.chunk.js.map": "/spotifysurf-react/static/js/3.b6954064.chunk.js.map",
+    "index.html": "/spotifysurf-react/index.html",
+    "static/css/main.3857f044.chunk.css.map": "/spotifysurf-react/static/css/main.3857f044.chunk.css.map",
+    "static/js/2.eede1ee3.chunk.js.LICENSE.txt": "/spotifysurf-react/static/js/2.eede1ee3.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.4817111f.js",
+    "static/js/2.eede1ee3.chunk.js",
+    "static/css/main.3857f044.chunk.css",
+    "static/js/main.d88fff02.chunk.js"
+  ]
+}
